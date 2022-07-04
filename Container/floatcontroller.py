@@ -47,13 +47,9 @@ prevErrorX=0
 prevErrorY=0
 delivery_time=0
 doksanX=7.61111 #siyah top 7.5
-doksanY=7.61111 #siyah top 7.5
+doksanY=7.4 #siyah top 7.5
 pre_servo_out1 = 0
 pre_servo_out2 = 0
-
-rad=ctrlPnl.getSize() # siyah top 3 #tenis topu 6
-
-
 
 ###
 def PIDcontrol(ballPosX, ballPosY, prevBallPosX, prevBallPosY, refX, refY, Kp_PID, Ki_PID, Kd_PID, Lp, Li, Ld):     # PID controller
@@ -64,24 +60,15 @@ def PIDcontrol(ballPosX, ballPosY, prevBallPosX, prevBallPosY, refX, refY, Kp_PI
     global Ts, delivery_time, N
     global prevDerivX, prevDerivY, prevIntegX, prevIntegY
     global prevErrorX, prevErrorY
-
+    global LCD_X,LCD_Y
+    rad=ctrlPnl.getSize() # siyah top 3 #tenis topu 6
+    print("rad:", str(rad))
     Ts = time.time() - delivery_time    #sampling time
     delivery_time = time.time()
-    
-    #print("Time:" + str(Ts))
-    #print("Time:" + str(delivery_time))
 
     errorX = refX - ballPosX
     errorY = refY - ballPosY
 
-
-    #Kp = sliderCoefP.get()
-    #Ki = sliderCoefI.get()
-    #Kd = sliderCoefD.get()
-    #Kp=Kp_PID
-    #Ki=Ki_PID
-    #Kd=Kd_PID
-    
     
     if (abs(ballPosX) <= rad and abs(ballPosY) <= rad): # buyuk top 6 #kucuk top 4
         flagM=1
@@ -95,10 +82,7 @@ def PIDcontrol(ballPosX, ballPosY, prevBallPosX, prevBallPosY, refX, refY, Kp_PI
         Ki=Li #0   # siyah top 0.01 3 beyaz top 0.01 3 tenis ki 0.2
         Kd=Ld #2.5  # siyah top 2.5 # beyaz top 2.5 # tenis topu 2.5
 
-        #Kp=2
-        #Ki=0.1
-        #Kd=2
-       
+
     try:
         derivX = (prevBallPosX - ballPosX) / Ts
     except ZeroDivisionError:
@@ -109,17 +93,17 @@ def PIDcontrol(ballPosX, ballPosY, prevBallPosX, prevBallPosY, refX, refY, Kp_PI
     except ZeroDivisionError:
         derivY = 0
 
-    Cix = prevIntegX + errorX*Ki*0.1                    #Ki * totalErrorX
-    Ciy = prevIntegY + errorY*Ki*0.1                    #Ki * totalErrorX
+    Cix = prevIntegX + errorX*Ki*0.1   
+    Ciy = prevIntegY + errorY*Ki*0.1  
     print("PrevIntegX: "+str(prevIntegX) + " PrevIntegY: " + str(prevIntegY))
 
-    #if errorX==refX and errorY==refY:
-        #Cix=0
-        #Ciy=0
+    if rad==10:
+        Cix=0
+        Ciy=0
 
 
-    Cdx =  Ts/(1+N*Ts)*(N*Kd*derivX + prevDerivX/Ts) #(Kd*N*(errorX-prevErrorX)+prevDerivX)/(1+N*Ts)# #Kd * ((errorX - prevErrorX)/Ts)
-    Cdy =  Ts/(1+N*Ts)*(N*Kd*derivY + prevDerivY/Ts) #(Kd*N*(errorY-prevErrorY)+prevDerivY)/(1+N*Ts)# #Kd * ((errorY - prevErrorY)/Ts)
+    Cdx =  Ts/(1+N*Ts)*(N*Kd*derivX + prevDerivX/Ts) 
+    Cdy =  Ts/(1+N*Ts)*(N*Kd*derivY + prevDerivY/Ts) 
 
     print("PrevDerivX: "+str(prevDerivX) + " PrevDerivY: " + str(prevDerivY))
 
@@ -150,26 +134,12 @@ def PIDcontrol(ballPosX, ballPosY, prevBallPosX, prevBallPosY, refX, refY, Kp_PI
     flagM=1
     print("Kp: " + str(Kp) + " Ki: " + str(Ki) + " Kd: " + str(Kd))
             
-       
-    print(totalErrorX)
-    
+    print(totalErrorX)    
     
     servo_out1= Ix/22.5 +doksanX  #6.5
     servo_out2= Iy/22.5 +doksanY  #6.5
     servo_out1=servo_out1*10000
     servo_out2=servo_out2*10000
-
-    if (abs(ballPosX) <= rad/2 and abs(ballPosY) <= rad/2 ): # buyuk top 3 #kucuk top 2 #rad/2
-        servo_out1 = doksanX*10000
-        servo_out2 = doksanY*10000
-        
-    #elif (abs(ballPosX) < 6 and abs(ballPosY) < 6):
-        #servo_out1 = 0.8*servo_out1 + 0.2*pre_servo_out1
-        #servo_out2 = 0.8*servo_out2 + 0.2*pre_servo_out2
-
-    #pre_servo_out1 = servo_out1
-    #pre_servo_out2 = servo_out2
-        
     
     GPIO.hardware_PWM(servoPIN,50,int(servo_out1))
     GPIO.hardware_PWM(servoPIN2,50,int(servo_out2))
@@ -216,30 +186,7 @@ def grab_contours(cnts):
 def nothing (x):
     pass
 
-#agir sari   #golf #agir sari gece #pembe # mavi # beyaz gece # agir siyah # yeşil küçük # kırmızı #tenis #beyaz gunduz 
-#0           13     29              54      54      33          0           39           0          0       20
-#92          95     144             68      64      5           0           46           157        78      5
-#178         175    122             160     87      228         77          0            0          178     196
-#175         186    59              255     255     96          75          76           255        275     114
-#200         200    255             255     255     98          164         179          209        200     98
-#255         255    255             255     255     255         255         255          255        255     255
 
-
-##cv2.namedWindow ("Top Rengi/Boyutu Ayarla")#agir sari top 0 #golf topu 13 #turuncu golf topu ile aynı
-##                                                                            #agir sari   #golf #agir sari gece #pembe # mavi # beyaz # agir siyah # yeşil küçük # kırmızı #tenis
-##cv2.createTrackbar("Lower_H", "Top Rengi/Boyutu Ayarla", 39, 255, nothing)   #0           13     29              54      54      33      0           39           0          0
-##cv2.createTrackbar("Lower_S", "Top Rengi/Boyutu Ayarla", 46, 255, nothing)   #92          95     144             68      64      5       0           46           157        78
-##cv2.createTrackbar("Lower_V", "Top Rengi/Boyutu Ayarla", 0, 255, nothing)   #178         175    122             160     87      228     77          0            0          178
-##cv2.createTrackbar("Upper_H", "Top Rengi/Boyutu Ayarla", 76, 255, nothing)   #175         186    59              255     255     96      75          76           255        275
-##cv2.createTrackbar("Upper_S", "Top Rengi/Boyutu Ayarla", 179, 255, nothing)  #200         200    255             255     255     98      164         179          209        200
-##cv2.createTrackbar("Upper_V", "Top Rengi/Boyutu Ayarla", 255, 255, nothing)  #255         255    255             255     255     255     255         255          255        255
-##cv2.createTrackbar("Min_Radius", "Top Rengi/Boyutu Ayarla", 10, 255, nothing)
-##cv2.createTrackbar("Max_Radius", "Top Rengi/Boyutu Ayarla", 50, 255, nothing)
-##
-##cv2.namedWindow ("PID Parametre Ayarla")
-##cv2.createTrackbar("Kp", "PID Parametre Ayarla", 93, 1000, nothing) #ilk deger 200 siyah top 215 # beyaz top 13  24       #yeşil top 93
-##cv2.createTrackbar("Ki", "PID Parametre Ayarla", 25, 1000, nothing) #ilk deger 30 siyah top 110 # beyaz top 22    13                   0
-##cv2.createTrackbar("Kd", "PID Parametre Ayarla", 162, 1000, nothing) #ilk deger 300 siyah top 300  # beyaz top 116   409             162
 ScaleX = 0
 ScaleY = 0
 PID_Counter = 0
@@ -261,23 +208,6 @@ def main():
     blurred = cv2.GaussianBlur(frame, (11,11), 0)
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
     
-##    l_h = cv2.getTrackbarPos("Lower_H", "Top Rengi/Boyutu Ayarla")
-##    l_s = cv2.getTrackbarPos("Lower_S", "Top Rengi/Boyutu Ayarla")
-##    l_v = cv2.getTrackbarPos("Lower_V", "Top Rengi/Boyutu Ayarla")
-##	
-##    u_h = cv2.getTrackbarPos("Upper_H", "Top Rengi/Boyutu Ayarla")
-##    u_s = cv2.getTrackbarPos("Upper_S", "Top Rengi/Boyutu Ayarla")
-##    u_v = cv2.getTrackbarPos("Upper_V", "Top Rengi/Boyutu Ayarla")
-##
-##    min_r = cv2.getTrackbarPos("Min_Radius", "Top Rengi/Boyutu Ayarla")
-##    max_r = cv2.getTrackbarPos("Max_Radius", "Top Rengi/Boyutu Ayarla")
-##
-##    Ki = cv2.getTrackbarPos("Ki", "PID Parametre Ayarla")
-##    Kp = cv2.getTrackbarPos("Kp", "PID Parametre Ayarla")
-##    Kd = cv2.getTrackbarPos("Kd", "PID Parametre Ayarla")
-
-
-
     Kp, Ki, Kd = ctrlPnl.getInnerPID()
     Lp, Li, Ld = ctrlPnl.getOuterPID()
 
@@ -293,7 +223,7 @@ def main():
     mask = cv2.inRange(hsv, l_b, u_b)
     mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=2)
-    #res = cv2.bitwise_and(frame, frame, mask)
+
     circles = cv2.HoughCircles(mask, cv2.HOUGH_GRADIENT, 2, 500, param1=300,
                                param2=10, minRadius=min_r, maxRadius=max_r)
 
@@ -312,8 +242,8 @@ def main():
         cv2.circle(frame, (center[0], center[1]), 1, (0,255,0), 3)
         cv2.circle(frame, (center[0], center[1]), center[2], (0,0,255), 3)
         prevCircle = center
-        ScaleX = int((center[0]-150)*ScaleCoef)
-        ScaleY = int((center[1]-150)*ScaleCoef)
+        ScaleX = ((center[0]-150)*ScaleCoef)
+        ScaleY = ((center[1]-150)*ScaleCoef)
         ScaleCenter = [ScaleX, ScaleY]
         print(ScaleCenter)
         rX=0
@@ -327,14 +257,10 @@ def main():
     else:
         noBallFlag=0
         IsBallDetected = 0
-        #Servo1.ChangeDutyCycle(6.94) #levhaya gore doksana yakın
-        #Servo2.ChangeDutyCycle(6.94)
-        #Servo1.ChangeDutyCycle(0)
-        #Servo2.ChangeDutyCycle(0)
-    #cv2.imshow('Frame',frame)
-    #cv2.imshow('Mask',mask)
+ 
     print("Flag: " + str(IsBallDetected))
-##    writeToLCD (ScaleX, ScaleY, IsBallDetected)
+    print("Flag: " + str(IsBallDetected))
+    writeToLCD (int(ScaleX), int(ScaleY), IsBallDetected)
 
 
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -358,7 +284,5 @@ main()
 mainWindow.mainloop()
 
 cap.release()
-cv2.destroyAllWindows()
+cv2.destroyAllWindows()  
 
-
-   
